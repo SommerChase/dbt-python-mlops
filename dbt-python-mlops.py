@@ -14,7 +14,7 @@ def model(dbt, session):
         packages=["pandas", "scikit-learn"]
         )
 
-    dwp = dbt.ref("dw_policies").to_pandas()
+    dwp = dbt.ref("policies").to_pandas()
     dwp.columns = dwp.columns.str.lower()
 
     # Essentially a select statement:
