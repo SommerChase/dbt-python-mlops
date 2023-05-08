@@ -14,11 +14,11 @@ def model(dbt, session):
         packages=["pandas", "scikit-learn"]
         )
 
-    dwp = dbt.ref("policies").to_pandas()
-    dwp.columns = dwp.columns.str.lower()
+    p = dbt.ref("policies").to_pandas()
+    p.columns = p.columns.str.lower()
 
     # Essentially a select statement:
-    dwp_trimmed = dwp[[
+    p_trimmed = p[[
                       "state_abbreviation"
                     , "risk_1"
                     , "segment_1"
@@ -31,22 +31,22 @@ def model(dbt, session):
                     , "premium"
                     ]]
 
-    dwp_continuous = dwp_trimmed.select_dtypes(include=[float])
-    dwp_continuous.fillna(0, inplace=True)
+    p_continuous = p_trimmed.select_dtypes(include=[float])
+    p_continuous.fillna(0, inplace=True)
 
     # Select all categorical columns to be encoded
-    dwp_categorical = dwp_trimmed.select_dtypes(include=[object])
+    p_categorical = p_trimmed.select_dtypes(include=[object])
 
     #https://towardsdatascience.com/scikit-learn-1-1-comes-with-an-improved-onehotencoder-5a1f939da190
     ohe = OneHotEncoder(sparse=False)
-    ohe.fit(dwp_categorical)
-    onehotlablels = ohe.transform(dwp_categorical)
-    encoded_dwp = pd.DataFrame(
+    ohe.fit(p_categorical)
+    onehotlablels = ohe.transform(p_categorical)
+    encoded_p = pd.DataFrame(
         onehotlablels,
         columns=ohe.get_feature_names_out()
     )
 
-    final_transformed_data = encoded_dwp.merge(dwp_continuous,
+    final_transformed_data = encoded_p.merge(p_continuous,
                                            how="inner",
                                            left_index=True,
                                            right_index=True)
